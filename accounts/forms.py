@@ -26,3 +26,9 @@ class CodeForm(forms.Form):
 class EmailForm(forms.Form):
     email = forms.EmailField(label='Email')
 
+class NewPasswordForm(forms.Form):
+    password = forms.CharField(label='Новый пароль', widget=forms.PasswordInput)
+
+class ChangePasswordForm(forms.Form):
+    old_password = forms.CharField(label='Старый пароль', widget=forms.PasswordInput)
+    new_password = forms.CharField(label='Новый пароль', widget=forms.PasswordInput)

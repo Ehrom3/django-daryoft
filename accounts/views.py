@@ -74,3 +74,47 @@ def logout_view(request):
     logout(request)
     return redirect('home')
 
+def forgot(request):
+    form = EmailForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        user = User.objects.filter(email=form.cleaned_data['email'], is_active=True).first()
+        if user:
+            send_code(user, 'reset')
+            request.session['reset_user'] = user.pk
+            return redirect('reset_password')
+        messages.info(request, 'Если адрес зарегистрирован, обратитесь к форме входа или повторите запрос.')
+    return render(request, 'accounts/form.html', {'form': form, 'title': 'Забыли пароль?'})
+
+def reset_password(request):
+    user = User.objects.filter(pk=request.session.get('reset_user'), is_active=True).first()
+    if not user:
+        return redirect('forgot')
+
+    class ResetForm(CodeForm, NewPasswordForm):
+        pass
+    form = ResetForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        record = EmailCode.objects.filter(user=user, purpose='reset', code=form.cleaned_data['code'], created_at__gte=timezone.now() - timedelta(minutes=10)).first()
+        if record:
+            user.set_password(form.cleaned_data['password'])
+            user.save()
+            EmailCode.objects.filter(user=user, purpose='reset').delete()
+            request.session.pop('reset_user', None)
+            messages.success(request, 'Пароль изменён')
+            return redirect('login')
+        form.add_error('code', 'Неверный или просроченный код')
+    return render(request, 'accounts/form.html', {'form': form, 'title': 'Восстановление пароля'})
+
+@login_required
+def change_password(request):
+    form = ChangePasswordForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        if not request.user.check_password(form.cleaned_data['old_password']):
+            form.add_error('old_password', 'Неверный пароль')
+        else:
+            request.user.set_password(form.cleaned_data['new_password'])
+            request.user.save()
+            update_session_auth_hash(request, request.user)
+            messages.success(request, 'Пароль изменён')
+            return redirect('home')
+    return render(request, 'accounts/form.html', {'form': form, 'title': 'Смена пароля'})
