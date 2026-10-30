@@ -1,0 +1,10 @@
+from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
+from .models import User, EmailCode
+
+@admin.register(User)
+
+
+class CustomUserAdmin(UserAdmin):
+    fieldsets = UserAdmin.fieldsets + (('Контакты', {'fields': ('phone',)}),)
+admin.site.register(EmailCode)

@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+    <section class="panel narrow">
+        <h1>
+            {{ title }}
+        </h1>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button class="primary">
+                Продолжить
+            </button>
+        </form>
+        {% if resend %}
+            <form method="post" action="{% url 'resend' %}">
+                {% csrf_token %}
+                <button>
+                    Отправить код повторно
+                </button>
+            </form>
+        {% endif %}
+        {% if title == 'Вход' %}
+            <p>
+                <a href="{% url 'forgot' %}">
+                    Забыли пароль?
+                </a>
+            </p>
+        {% endif %}
+    </section>
+{% endblock %}

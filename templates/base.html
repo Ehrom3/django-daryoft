@@ -1,0 +1,63 @@
+{% load static %}
+<!doctype html>
+<html lang="ru">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>
+            Daryoft
+        </title>
+        <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    </head>
+    <body>
+        <header>
+            <a class="logo" href="{% url 'home' %}">
+                🔎 DARYOFT
+            </a>
+            <nav>
+                <a href="{% url 'home' %}">
+                    Главная
+                </a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'create' %}">
+                        Добавить
+                    </a>
+                    <a href="{% url 'my_items' %}">
+                        Мои объявления
+                    </a>
+                    <a href="{% url 'my_responses' %}">
+                        Мои отклики
+                    </a>
+                    <a href="{% url 'change_password' %}">
+                        Пароль
+                    </a>
+                    <form method="post" action="{% url 'logout' %}" class="inline">
+                        {% csrf_token %}
+                        <button>
+                            Выйти
+                        </button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}">
+                        Вход
+                    </a>
+                    <a href="{% url 'register' %}">
+                        Регистрация
+                    </a>
+                {% endif %}
+            </nav>
+        </header>
+        <main>
+            {% for message in messages %}
+                <div class="notice">
+                    {{ message }}
+                </div>
+            {% endfor %}
+            {% block content %}
+            {% endblock %}
+        </main>
+        <footer>
+            Daryoft — потерянные и найденные вещи
+        </footer>
+    </body>
+</html>
