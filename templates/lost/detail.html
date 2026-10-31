@@ -1,84 +1,49 @@
 {% extends 'base.html' %}
 {% block content %}
     <section class="panel">
-        <span class="badge">
-            {{ item.get_kind_display }}
-        </span>
-        <h1>
-            {{ item.title }}
-        </h1>
-        {% if item.image %}
-            <img class="detailimg" src="{{ item.image.url }}" alt="Фото">
-        {% endif %}
-        <p>
-            {{ item.description|linebreaks }}
-        </p>
-        <p>
-            <b>
-                Город:
-            </b>
-            {{ item.city }}
-            ·
-            <b>
-                Категория:
-            </b>
-            {{ item.category }}
-        </p>
-        <p>
-            <b>
-                Место:
-            </b>
-            {{ item.location }}
-            ·
-            <b>
-                Дата:
-            </b>
-            {{ item.event_date }}
-        </p>
-        <p>
-            <b>
-                Статус:
-            </b>
-            {{ item.get_status_display }}
-        </p>
-        {% if user == item.author or user.is_staff %}
-            <a class="linkbutton" href="{% url 'update' item.pk %}">
-                Изменить
-            </a>
-            <form class="inline" method="post" action="{% url 'delete' item.pk %}" onsubmit="return confirm('Удалить объявление?')">
-                {% csrf_token %}
-                <button class="danger">
-                    Удалить
-                </button>
-            </form>
-        {% elif user.is_authenticated %}
-            <a class="primary linkbutton" href="{% url 'respond' item.pk %}">
-                Откликнуться
-            </a>
-        {% else %}
-            <a href="{% url 'login' %}">
-                Войдите, чтобы откликнуться
-            </a>
-        {% endif %}
+        <span class="badge {% if item.kind == 'found' %}found{% endif %} {% if item.status == 'closed' %}closed{% endif %}">{{ item.get_kind_display }}</span>
+        <div class="detail-layout">
+            <div>
+                <h1>{{ item.title }}</h1>
+                {% if item.image %}
+                    <div class="detail-image-wrap"><img class="detailimg" src="{{ item.image.url }}" alt="{{ item.title }}"></div>
+                {% else %}
+                    <div class="placeholder" style="height:320px;border-radius:16px">⌕</div>
+                {% endif %}
+                <div>{{ item.description|linebreaks }}</div>
+            </div>
+            <aside>
+                <div class="detail-facts">
+                    <p><b>Город</b>{{ item.city }}</p>
+                    <p><b>Категория</b>{{ item.category }}</p>
+                    <p><b>Место</b>{{ item.location }}</p>
+                    <p><b>Дата</b>{{ item.event_date|date:'d.m.Y' }}</p>
+                    <p><b>Статус</b>{{ item.get_status_display }}</p>
+                </div>
+                <div class="detail-actions" style="margin-top:16px">
+                    {% if user == item.author or user.is_staff %}
+                        <a class="primary linkbutton" href="{% url 'update' item.pk %}">Изменить</a>
+                        <form class="inline" method="post" action="{% url 'delete' item.pk %}" onsubmit="return confirm('Удалить объявление?')">
+                            {% csrf_token %}<button class="danger">Удалить</button>
+                        </form>
+                    {% elif user.is_authenticated %}
+                        <a class="primary linkbutton" href="{% url 'respond' item.pk %}">Откликнуться</a>
+                    {% else %}
+                        <a class="primary linkbutton" href="{% url 'login' %}">Войти и откликнуться</a>
+                    {% endif %}
+                </div>
+            </aside>
+        </div>
+
         {% if responses != None %}
-            <h2>
-                Полученные отклики
-            </h2>
+            <h2 style="margin-top:32px">Полученные отклики</h2>
             {% for response in responses %}
                 <div class="response">
-                    <b>
-                        {{ response.user.username }}
-                    </b>
-                    ·
-                    {{ response.phone }}
-                    <p>
-                        {{ response.message }}
-                    </p>
+                    <b>{{ response.user.username }}</b> · {{ response.phone }}
+                    <p>{{ response.message }}</p>
                 </div>
             {% empty %}
-                <p>
-                    Откликов пока нет.
-                </p>
+                <p>Откликов пока нет.</p>
             {% endfor %}
         {% endif %}
     </section>

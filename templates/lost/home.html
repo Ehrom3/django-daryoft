@@ -1,95 +1,56 @@
 {% extends 'base.html' %}
 {% block content %}
     <section class="hero">
-        <h1>
-            {% if mine %}
-                Мои объявления
-            {% else %}
-                Найдём потерянное вместе
-            {% endif %}
-        </h1>
-        <p>
-            Объявления о потерянных и найденных вещах
-        </p>
-        <a class="primary linkbutton" href="{% url 'create' %}">
-            + Разместить объявление
-        </a>
+        <div class="hero-content">
+            <div class="hero-kicker">Сервис объявлений</div>
+            <h1>{% if mine %}Мои объявления{% else %}Поможем найти то, что важно{% endif %}</h1>
+            <p>Ищите потерянные вещи и помогайте находить чужие находки рядом с вами.</p>
+            <a class="primary linkbutton" href="{% url 'create' %}">+ Разместить объявление</a>
+        </div>
     </section>
+
     {% if not mine %}
         <form class="filters" method="get">
-            <input name="q" placeholder="Поиск" value="{{ request.GET.q }}">
+            <input name="q" placeholder="Что ищете?" value="{{ request.GET.q }}">
             <select name="city">
-                <option value="">
-                    Все города
-                </option>
+                <option value="">Все города</option>
                 {% for city in cities %}
-                    <option value="{{ city.pk }}" {% if request.GET.city == city.pk|stringformat:'s' %}selected{% endif %}>
-                        {{ city.name }}
-                    </option>
+                    <option value="{{ city.pk }}" {% if request.GET.city == city.pk|stringformat:'s' %}selected{% endif %}>{{ city.name }}</option>
                 {% endfor %}
             </select>
             <select name="category">
-                <option value="">
-                    Все категории
-                </option>
+                <option value="">Все категории</option>
                 {% for category in categories %}
-                    <option value="{{ category.pk }}" {% if request.GET.category == category.pk|stringformat:'s' %}selected{% endif %}>
-                        {{ category.name }}
-                    </option>
+                    <option value="{{ category.pk }}" {% if request.GET.category == category.pk|stringformat:'s' %}selected{% endif %}>{{ category.name }}</option>
                 {% endfor %}
             </select>
             <select name="kind">
-                <option value="">
-                    Все типы
-                </option>
-                <option value="lost">
-                    Потеряно
-                </option>
-                <option value="found">
-                    Найдено
-                </option>
+                <option value="">Все типы</option>
+                <option value="lost" {% if request.GET.kind == 'lost' %}selected{% endif %}>Потеряно</option>
+                <option value="found" {% if request.GET.kind == 'found' %}selected{% endif %}>Найдено</option>
             </select>
-            <button>
-                Найти
-            </button>
+            <button>Найти</button>
         </form>
     {% endif %}
+
     <div class="grid">
         {% for item in items %}
             <article class="card">
                 {% if item.image %}
-                    <img src="{{ item.image.url }}" alt="Фото вещи">
+                    <img src="{{ item.image.url }}" alt="{{ item.title }}">
                 {% else %}
-                    <div class="placeholder">
-                        📦
-                    </div>
+                    <div class="placeholder" aria-label="Фото не добавлено">⌕</div>
                 {% endif %}
                 <div class="cardbody">
-                    <span class="badge">
-                        {{ item.get_kind_display }}
-                    </span>
-                    <h2>
-                        <a href="{% url 'detail' item.pk %}">
-                            {{ item.title }}
-                        </a>
-                    </h2>
-                    <p>
-                        {{ item.city }}
-                        ·
-                        {{ item.category }}
-                    </p>
-                    <p>
-                        {{ item.description|truncatechars:110 }}
-                    </p>
-                    <a href="{% url 'detail' item.pk %}">
-                        Подробнее →
-                    </a>
+                    <span class="badge {% if item.kind == 'found' %}found{% endif %}">{{ item.get_kind_display }}</span>
+                    <h2><a href="{% url 'detail' item.pk %}">{{ item.title }}</a></h2>
+                    <p class="card-meta">{{ item.city }} · {{ item.category }} · {{ item.event_date|date:'d.m.Y' }}</p>
+                    <p class="card-description">{{ item.description|truncatechars:110 }}</p>
+                    <a class="card-link" href="{% url 'detail' item.pk %}">Подробнее →</a>
                 </div>
             </article>
         {% empty %}
-            <p>
-                Объявлений пока нет. Добавьте первое!
-            </p>
+            <div class="empty-state">Объявлений пока нет. Добавьте первое объявление!</div>
         {% endfor %}
     </div>
 {% endblock %}
