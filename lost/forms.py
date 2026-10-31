@@ -8,3 +8,8 @@ class ItemForm(forms.ModelForm):
         fields = ['title', 'description', 'image', 'category', 'city', 'location', 'event_date', 'kind', 'status']
         widgets = {'event_date': forms.DateInput(attrs={'type': 'date'})}
 
+class ResponseForm(forms.ModelForm):
+
+    class Meta:
+        model = Response
+        fields = ['message', 'phone']

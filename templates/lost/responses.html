@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h1>
+        Мои отклики
+    </h1>
+    {% for response in responses %}
+        <div class="panel">
+            <a href="{% url 'detail' response.item.pk %}">
+                <b>
+                    {{ response.item.title }}
+                </b>
+            </a>
+            <p>
+                {{ response.message }}
+            </p>
+            <small>
+                Телефон:
+                {{ response.phone }}
+            </small>
+        </div>
+    {% empty %}
+        <p>
+            Вы пока не отправляли отклики.
+        </p>
+    {% endfor %}
+{% endblock %}
